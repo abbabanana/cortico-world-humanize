@@ -1,0 +1,37 @@
+{
+  "name": "cortico-world-humanize",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Cortico World for Coopanion: before the pet answers, reads the situation, mood and the pet's own memory and hands it a short inner thought, and reminds it when it slips into stock AI sentence patterns",
+  "author": "abbabanana",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abbabanana/cortico-world-humanize.git"
+  },
+  "homepage": "https://github.com/abbabanana/cortico-world-humanize#readme",
+  "bugs": {
+    "url": "https://github.com/abbabanana/cortico-world-humanize/issues"
+  },
+  "keywords": ["cortico-world", "cortico", "coopanion", "companion", "roleplay", "qq"],
+  "engines": { "node": ">=22" },
+  "main": "./src/index.ts",
+  "cortico": {
+    "kind": "world",
+    "api": 6,
+    "displayName": "活人感",
+    "locales": {
+      "zh": {
+        "displayName": "活人感",
+        "description": "桌宠开口前，先读一下情境、心情和它自己的记忆，递给它一句「此刻心里的想法」；它要是用了「不是……而是……」、先复述你的话这类 AI 固定句式，下次就提醒它换个说法。口癖、语气、长短都不碰。搭配「活人感 provider」效果最好。"
+      },
+      "en": {
+        "displayName": "Humanize",
+        "description": "Before the pet answers, reads the situation, mood and the pet's own memory and hands it a short inner thought; when it slips into stock AI sentence patterns (\"not X but Y\", parroting your words back), it is reminded to say it another way next time. Catchphrases, tone and length are left alone. Works best with the Humanize provider."
+      }
+    },
+    "tags": ["companion", "internal-state", "qq", "im", "high-cost", "injection-risk", "experimental"],
+    "describe": "describe.json"
+  },
+  "files": ["src", "presets", "describe.json", "README.md", "CHANGELOG.md", "LICENSE"]
+}

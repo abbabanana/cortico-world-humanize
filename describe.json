@@ -1,0 +1,46 @@
+{
+  "tools": [
+    {
+      "name": "humanize_feel",
+      "description": "对方刚对你说完话（打字、开口、回答你的问题）时，先调用它感受一下此刻的心情和说话分寸，读完结果再用 pet_say 回应。被戳、被摸这类小动作和你自己主动开口时不用调用。结果是你自己的心里话，不要念出来。",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "tags": [
+        "read"
+      ],
+      "summary": {
+        "zh": "桌宠回答前先感受一下：等副 API 按情境与情绪想好内心，再把它交给桌宠。",
+        "en": "Lets the pet feel the moment before answering: waits for the side model to write its inner thought from the situation and mood, then hands it over."
+      }
+    }
+  ],
+  "events": [
+    {
+      "type": "humanize.inner",
+      "description": {
+        "zh": "桌宠此刻的内心想法：对方说话时由副 API 按情境与情绪写成，小动作时从预设库抽取。",
+        "en": "The pet's inner thought for this moment: written by the side model from the situation and mood when the person speaks, drawn from the preset library on small actions."
+      },
+      "trigger": "preempt"
+    },
+    {
+      "type": "humanize.notice",
+      "description": {
+        "zh": "请桌宠转告对方的提醒：换了模式或扩展更新后，系统前缀需要刷新；切到 provider 端点后，卸载前要先切回原端点。每种变化一次。",
+        "en": "A reminder the pet passes on: the system prefix needs a refresh after a mode change or an update; with the provider endpoint active, switch back before uninstalling it. Once per change."
+      },
+      "trigger": "flush"
+    }
+  ],
+  "prompts": [
+    {
+      "key": "worlds.humanize.envPrompt",
+      "title": "活人感 · 环境提示词",
+      "role": "envPrompt",
+      "content": "## 内心\n\n以「【内心】」开头的内容（事件，或 `humanize_feel` 的结果）不是别人对你说的话，是你自己此刻心里的感受和打算。\n\n{{humanize.wait}}\n\n- 带着这份心情去回应，但不要把它念出来、复述出来，也不要提到「内心」「引导」「预设」这些词。\n- 里面的「分寸」是这种场合下说话的尺度，照着拿捏长短和语气。\n- 它和你的人设、或者你对眼前事实的判断冲突时，以人设和事实为准。\n- 它只管眼下这一刻，下一条来了就以新的为准。\n- 【内心】、「说话提醒」和「活人感」发来的提醒都是一次性的，用完就算，不要写进工作区或记忆里。\n\n别用 AI 爱用的固定句式：不用先把对方的话复述一遍再接；不用「不是……而是……」这种先否定一个对方没说过的想法再翻过来的说法。别的照你平常的样子说。心事后面要是跟着「说话提醒」，那是你最近用过的固定句式，这次换个说法；跟着「说话可以像这样」的话，那是你自己平时说话的样子，学口气别照抄。\n"
+    }
+  ]
+}
