@@ -538,7 +538,7 @@ export class HumanizeWorld implements World {
         via,
         latest: text,
         recent,
-        scenes: presets.scenes.map((s) => ({ name: s.name, note: s.note })),
+        scenes: presets.scenes.map((s) => ({ name: s.name, note: s.note, style: s.style })),
         emotions: emotionsOf(presets),
         persona: this.persona.get(),
         main,
@@ -612,8 +612,8 @@ export class HumanizeWorld implements World {
       if (reading?.intent) parts.push(`，ta 想要的是：${reading.intent}`);
       parts.push('。');
     }
+    // 情境的「风格」不跟着发给桌宠：写成一条指示，桌宠就会照着演。副 API 写心里话时参考它
     parts.push(`我心里想：${thought}`);
-    if (scene?.style) parts.push(`\n分寸：${scene.style}`);
     return parts.join('');
   }
 

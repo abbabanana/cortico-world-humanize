@@ -24,7 +24,8 @@ export interface AnalyzeInput {
   via: string;
   latest: string;
   recent: Line[];
-  scenes: Array<{ name: string; note: string }>;
+  /** `style` 是这种场合的样子：只给副 API 参考，不发给桌宠。 */
+  scenes: Array<{ name: string; note: string; style?: string }>;
   emotions: string[];
   /** 现读的人设；两项都空时按通用的桌面小伙伴来写。 */
   persona?: Persona;
@@ -78,6 +79,7 @@ function systemPrompt(persona: Persona | undefined, main: MainContext | null | u
     '## thought 怎么写',
     '- 用上面这个桌宠自己的性子和口吻，第一人称，口语。',
     '- 先是此刻自己的感受或小私心（高兴、委屈、想被理、犯困、好奇……），再是打算怎么回应。',
+    '- 情境后面括号里写的是这种场合的样子，想打算时参考它，但要落到对方这一句话上、用桌宠自己的念头说出来，别照抄括号里的字。',
     '- 要具体，贴着对方刚说的那句话；不要写成放之四海皆准的道理。',
     '- 消息可能来自别的平台或群聊里的其他人：按消息里写明的说话人来想，那人不一定是上面记下的那位；提到别人就直接用消息里的名字。',
     '- 只写心里话，不写要说出口的台词；口癖、对对方的称呼这些说出口的东西，留给开口的时候。',
@@ -114,7 +116,7 @@ function userPrompt(input: AnalyzeInput): string {
     `现在：${input.clock}；距上一次对话：${gap}`,
     '',
     '可选情境：',
-    ...input.scenes.map((s) => `- ${s.name}${s.note ? `：${s.note}` : ''}`),
+    ...input.scenes.map((s) => `- ${s.name}${s.note ? `：${s.note}` : ''}${s.style ? `（${s.style}）` : ''}`),
     '',
     `可选情绪：${input.emotions.join('、')}`,
     '',

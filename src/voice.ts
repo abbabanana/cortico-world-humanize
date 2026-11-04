@@ -128,7 +128,7 @@ function userPrompt(persona: Persona, scenes: Array<{ name: string; note: string
     persona.partner || '（还没有记录。）',
     '',
     '## 情境',
-    ...scenes.map((s) => `- ${s.name}：${s.note}${s.style ? `（分寸：${s.style}）` : ''}`),
+    ...scenes.map((s) => `- ${s.name}：${s.note}${s.style ? `（${s.style}）` : ''}`),
     `- ${GENERIC}：随便什么时候都能用的`,
   ].join('\n');
 }

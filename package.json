@@ -1,6 +1,6 @@
 {
   "name": "cortico-world-humanize",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "type": "module",
   "description": "Cortico World for Coopanion: before the pet answers, reads the situation, mood and the pet's own memory and hands it a short inner thought, and reminds it when it slips into stock AI sentence patterns",
   "author": "abbabanana",
