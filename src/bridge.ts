@@ -1,10 +1,13 @@
 /**
- * World 与「活人感」provider 之间的桥：两个包装在同一个进程里，靠 globalThis 上一个约定好的
- * Symbol 碰头，谁也不 import 谁。World 启动时挂上，停用时摘掉；provider 找不到桥就原样转发。
+ * World 与「活人感」provider 之间的桥：两个包装在同一个进程里，靠 globalThis 上约定好的
+ * Symbol 碰头，谁也不 import 谁。
+ * - BRIDGE_KEY:World 启动时挂上，停用时摘掉；provider 找不到就原样转发。
+ * - PROVIDER_KEY:provider 加载时挂上，说明它包住了哪些端点模块；World 据此判断走不走 provider 模式。
  * 改这里的形状要同时改 cortico-provider-humanize/src/bridge.ts,并把 version 加一。
  */
 export const BRIDGE_KEY = Symbol.for('cortico-humanize.bridge');
-export const BRIDGE_VERSION = 2;
+export const PROVIDER_KEY = Symbol.for('cortico-humanize.provider');
+export const BRIDGE_VERSION = 3;
 
 /** 主模型这次请求里看到的东西，provider 原样转述（已截短）。 */
 export interface MainContext {
@@ -28,6 +31,13 @@ export interface HumanizeBridge {
   touch(): void;
 }
 
+/** provider 挂的牌子。 */
+export interface ProviderMarker {
+  version: typeof BRIDGE_VERSION;
+  /** 这种端点模块（端点配置里的 kind）是不是被活人感包着。 */
+  wraps(kind: string): boolean;
+}
+
 export function installBridge(bridge: HumanizeBridge): void {
   (globalThis as Record<symbol, unknown>)[BRIDGE_KEY] = bridge;
 }
@@ -35,4 +45,10 @@ export function installBridge(bridge: HumanizeBridge): void {
 export function removeBridge(bridge: HumanizeBridge): void {
   const g = globalThis as Record<symbol, unknown>;
   if (g[BRIDGE_KEY] === bridge) delete g[BRIDGE_KEY];
+}
+
+/** 装着的、版本对得上的 provider;没有给 null。 */
+export function providerMarker(): ProviderMarker | null {
+  const m = (globalThis as Record<symbol, unknown>)[PROVIDER_KEY] as ProviderMarker | undefined;
+  return m && m.version === BRIDGE_VERSION && typeof m.wraps === 'function' ? m : null;
 }

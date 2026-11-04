@@ -175,7 +175,7 @@ export function configGroups(keyStatus: string, notes: string[] = [], seen: Seen
           },
           [`${K}.notify`]: {
             type: 'boolean', title: '前缀需要刷新时让桌宠提醒我', 'x-hot': true,
-            description: '换了模式（比如切到 provider 端点、开关「先感受再开口」），或者活人感更新了说明之后，桌宠会用气泡说一次。每种变化只提醒一次。',
+            description: '换了模式（比如装上或卸掉 provider、开关「先感受再开口」），或者活人感更新了说明之后，桌宠会用气泡说一次。每种变化只提醒一次。',
           },
           [`${K}.autoRefresh`]: {
             type: 'boolean', title: '前缀需要刷新时自动刷新', 'x-hot': true,

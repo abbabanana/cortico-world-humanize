@@ -4,12 +4,14 @@
  * 改了环境说明之后，前缀会旧一阵。这里记下最近一次拼前缀时的模式和环境说明的指纹（落盘，
  * 重启也在），和此刻该有的比一比，不一样就提醒人去 World 页关开一次。
  *
- * provider 模式按当前端点的配置判断（部署 config.json 的 activeProvider → 那个端点的 kind），
- * 不看「最近有没有转发过请求」：重启后第一次拼前缀时 provider 还没转发过，看时间会误判。
+ * provider 模式按当前端点的配置判断（部署 config.json 的 activeProvider → 那个端点的 kind,
+ * 再问 provider 挂的牌子包没包这种 kind），不看「最近有没有转发过请求」：重启后第一次拼前缀时
+ * provider 还没转发过，看时间会误判。
  */
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
+import { providerMarker } from './bridge.ts';
 
 export type Mode = 'provider' | 'tool' | 'push';
 
@@ -19,7 +21,8 @@ export const MODE_LABEL: Record<Mode, string> = {
   push: '抢时间模式（心事作为事件推送）',
 };
 
-const PROVIDER_KIND = 'humanize';
+/** 0.1.0 时要手动新建的那种端点。 */
+const LEGACY_KIND = 'humanize';
 
 interface Saved {
   prefix?: { mode: Mode; sig: string };
@@ -73,9 +76,21 @@ export class PrefixState {
     return typeof name === 'string' ? name : '';
   }
 
-  /** 当前端点是不是「活人感」provider 包着的那种。 */
+  /** 当前端点的模块（kind）；读不到给空串。 */
+  activeKind(): string {
+    const kind = this.endpoint.read()?.kind;
+    return typeof kind === 'string' ? kind : '';
+  }
+
+  /** 当前端点有没有被「活人感」provider 包着：装了 provider,且它包住了这种端点。 */
   providerConfigured(): boolean {
-    return this.endpoint.read()?.kind === PROVIDER_KIND;
+    const kind = this.activeKind();
+    return !!kind && !!providerMarker()?.wraps(kind);
+  }
+
+  /** 当前端点是不是 0.1.0 时手动新建的那种（卸 provider 前要先切回原端点）。 */
+  legacyEndpoint(): boolean {
+    return this.activeKind() === LEGACY_KIND;
   }
 
   /** 拼前缀时记下当时的模式和指纹。 */

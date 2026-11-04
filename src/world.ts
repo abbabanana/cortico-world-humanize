@@ -3,7 +3,7 @@
  *
  * - 有人对桌宠说话（桌宠、控制台、适配过的 QQ 扩展、勾上的其他来源）：调副 API 读情境、写一句
  *   内心引导，后面跟上「说话提醒」（桌宠最近真用过的套路句式）。交给桌宠有三条路：
- *   - provider 模式（当前端点是「活人感」provider 包着的那个）：provider 在主模型请求发出前来认领，
+ *   - provider 模式（装了「活人感」provider,它包着当前端点）：provider 在主模型请求发出前来认领，
  *     顺带递来主模型的上下文；心事想好后由它塞进请求。主模型这一轮就带着心事开口。
  *   - 先感受再开口（`wait`,默认）：环境提示词让模型先调用 `humanize_feel`,工具等副 API 的结果
  *     回来，把内心交回给模型，模型读完再说话。
@@ -757,8 +757,8 @@ export class HumanizeWorld implements World {
     const what = stale.from !== stale.to
       ? `换成了${MODE_LABEL[stale.to]}`
       : '更新了给桌宠的说明';
-    const uninstall = stale.to === 'provider'
-      ? '另外记一下：以后要卸载「活人感 provider」的话，先在「模型」页把端点切回原来那个，不然我会说不了话。'
+    const uninstall = stale.to === 'provider' && this.prefixState.legacyEndpoint()
+      ? '另外记一下：现在用的是旧版的「活人感」端点，以后要卸载「活人感 provider」的话，先在「模型」页把端点切回原来那个，不然我会说不了话。'
       : '';
     if (this.cfg.autoRefresh) {
       if (this.phase !== 'idle' || !this.prefixState.firstTime(`refresh:${key}`)) return;
@@ -808,8 +808,8 @@ export class HumanizeWorld implements World {
     if (this.cfg.voice && voice.outdated && voice.edited) {
       notes.push('人设改过了，但口吻样本是按旧人设写的（你改过它，所以没有自动重写）：想按新人设重写，勾一下下面的「重写口吻样本」。');
     }
-    if (this.prefixState.providerConfigured()) {
-      notes.push(`当前端点「${this.prefixState.activeEndpoint()}」由活人感 provider 包着。以后要卸载 provider，先在「模型」页把端点切回原来的那个，不然桌宠会说不了话。`);
+    if (this.prefixState.legacyEndpoint()) {
+      notes.push(`当前端点「${this.prefixState.activeEndpoint()}」是旧版的「活人感」端点。现在不用它了：装着活人感 provider 时，你原来的端点会自动带上活人感。建议在「模型」页切回原来的端点；以后要卸载 provider，也一定要先切回去，不然桌宠会说不了话。`);
     }
     return notes;
   }

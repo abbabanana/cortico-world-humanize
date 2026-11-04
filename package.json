@@ -1,6 +1,6 @@
 {
   "name": "cortico-world-humanize",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "Cortico World for Coopanion: before the pet answers, reads the situation, mood and the pet's own memory and hands it a short inner thought, and reminds it when it slips into stock AI sentence patterns",
   "author": "abbabanana",
@@ -23,11 +23,11 @@
     "locales": {
       "zh": {
         "displayName": "活人感",
-        "description": "桌宠开口前，先读一下情境、心情和它自己的记忆，递给它一句「此刻心里的想法」；它要是用了「不是……而是……」、先复述你的话这类 AI 固定句式，下次就提醒它换个说法。口癖、语气、长短都不碰。搭配「活人感 provider」效果最好。"
+        "description": "让桌宠开口前先「想一想」，说话更像个人，少一点 AI 腔。单独装就能用，搭配「活人感 provider」更快。\n\n**它做什么**\n\n- 你对桌宠说话时，先读一下情境、你的心情和桌宠自己的记忆，递给它一句「此刻心里的想法」，再让它开口。\n- 桌宠要是用了「不是……而是……」、先复述你的话这类 AI 固定句式，下次就提醒它换个说法。口癖、语气、长短都不碰。\n\n**两个扩展怎么配合**\n\n- **活人感**（就是本扩展，必装）：负责想心事、查句式。单独装就能用。\n- **活人感 provider**（可选，推荐）：把心事直接放进发给模型的请求里。不装的话，桌宠每次要先调一次工具读心事再开口，多跑一轮，稍慢一点。\n- 只装 provider、不装本扩展，没有任何作用。\n\n**怎么用**\n\n1. 在扩展页装上本扩展，推荐把「活人感 provider」一起装上。\n2. 重启 Coopanion。\n3. 到 World 页打开「活人感」。\n\n主模型用的是 DeepSeek 的话，什么都不用填。用别家的话，在活人感的「配置 → 副 API」里填地址、模型和 Key。\n\n如果活人感已经开着、之后才装 provider，World 页会提示「系统前缀需要刷新」：把活人感关掉再打开一次就好，聊天记录会保留。\n\n**要知道的**\n\n- 你每说一句话，会多调用一次副 API（默认 DeepSeek，约 1–2 秒，花费很少）。\n- 默认读桌宠、控制台、QQ 私聊和 @桌宠的消息。QQ 群里别人的话会经过副 API 影响心事，介意的话可以在配置里关掉。\n- 只支持中文，目前只在 Windows + DeepSeek 上测过。\n- 不想用了：World 页关掉即可。卸载：扩展页卸掉，重启。"
       },
       "en": {
         "displayName": "Humanize",
-        "description": "Before the pet answers, reads the situation, mood and the pet's own memory and hands it a short inner thought; when it slips into stock AI sentence patterns (\"not X but Y\", parroting your words back), it is reminded to say it another way next time. Catchphrases, tone and length are left alone. Works best with the Humanize provider."
+        "description": "Lets the pet think for a moment before it speaks, so it sounds more like a person and less like an AI. Works on its own; faster with the Humanize provider.\n\n**What it does**\n\n- When you talk to the pet, it reads the situation, your mood and the pet's own memory, and hands the pet a short inner thought before it answers.\n- When the pet slips into stock AI sentence patterns (\"not X but Y\", parroting your words back), it is reminded to say it another way next time. Catchphrases, tone and length are left alone.\n\n**How the two extensions fit together**\n\n- **Humanize** (this one, required): writes the inner thought and checks sentence patterns. Works on its own.\n- **Humanize provider** (optional, recommended): puts the thought straight into the request sent to the model. Without it, the pet first calls a tool to read the thought, which costs one extra round.\n- The provider alone does nothing.\n\n**Getting started**\n\n1. Install this extension on the Extensions page, ideally together with the Humanize provider.\n2. Restart Coopanion.\n3. Turn on Humanize on the World page.\n\nIf your main model is DeepSeek, there is nothing to fill in. Otherwise enter the address, model and key under Config → Side API.\n\n**Good to know**\n\n- Each message you send adds one side-API call (DeepSeek by default, about 1–2 seconds, very cheap).\n- Prompts, presets and pattern checks are Chinese only. Tested on Windows with DeepSeek only.\n- To stop: turn it off on the World page. To uninstall: remove it on the Extensions page and restart."
       }
     },
     "tags": ["companion", "internal-state", "qq", "im", "high-cost", "injection-risk", "experimental"],

@@ -11,7 +11,7 @@
 
 ## 安装
 
-1. Coopanion 的「扩展」页搜 `cortico-world-humanize` 或「活人感」，安装。
+1. Coopanion 的「扩展」页搜「活人感」，安装 `cortico-world-humanize`。推荐把 `cortico-provider-humanize` 也装上（可选，装上就生效，不用设置）。
 2. 重启 Coopanion。
 3. World 页打开「活人感」。
 
@@ -35,7 +35,7 @@
 
 | 方式 | 什么时候 | 效果 |
 |---|---|---|
-| **provider 模式** | 装了活人感 provider，并把当前端点切到它包着的那个 | provider 在主模型请求发出前等心事，塞进请求再发。一轮就带着心事开口，最推荐 |
+| **provider 模式** | 装了活人感 provider（装上就自动包住你现在用的端点） | provider 在主模型请求发出前等心事，塞进请求再发。一轮就带着心事开口，最推荐 |
 | 先感受再开口（默认） | 没用 provider | 桌宠先调用 `humanize_feel`，工具等副 API 想好再交回去。每次都赶得上，但主模型多一轮 |
 | 抢时间 | 没用 provider，且关掉「先感受再开口」 | 心事作为事件推进去，桌宠已经开口就作废 |
 
@@ -86,7 +86,7 @@ Coopanion 重启后沿用旧的系统前缀。换了模式或者活人感更新�
 ## 停用和卸载
 
 - **暂时不用**：World 页关掉「活人感」。Coopanion 会立刻重建系统前缀，环境说明和 `humanize_feel` 工具一起拿掉。
-- **卸载**：用了 provider 的话，**先在「模型」页把当前端点切回原来那个**，再在「扩展」页卸掉两个包，然后重启。不切回去就卸 provider，桌宠会说不了话。
+- **卸载**：在「扩展」页卸掉两个包，然后重启。只有一种情况要先做一步：你用 0.1.0 时在「模型」页新建过「活人感」端点，而且当前端点还是它，那要**先把当前端点切回原来那个**，不然卸掉 provider 后桌宠会说不了话。
 - **清干净**：想连数据一起去掉，删掉上面「数据和隐私」里列的两个文件夹和配置段即可。
 
 ## 开发
@@ -109,4 +109,4 @@ MIT
 
 **Humanize** is a Cortico World for the Coopanion desktop pet. When someone talks to the pet, it reads the situation, the person's mood and the pet's own persona and memory files, and hands the pet a short inner thought before it answers. It also watches the pet's recent lines for stock AI sentence patterns ("not X but Y", parroting the other person's words back, either-or questions, aphorisms, and similar) and reminds the pet to say it another way when one shows up. It only targets sentence patterns: catchphrases, tone and length are left to the character.
 
-Install it from Coopanion's Extensions page, restart, and turn it on in the World page. It works best together with [cortico-provider-humanize](https://github.com/abbabanana/cortico-provider-humanize), which puts the inner thought straight into the main model's request. Prompts, presets and detection are Chinese only for now. Licensed under MIT.
+Install it from Coopanion's Extensions page, restart, and turn it on in the World page. It works best together with [cortico-provider-humanize](https://github.com/abbabanana/cortico-provider-humanize), which puts the inner thought straight into the main model's request; install it and restart, there is nothing to configure. Prompts, presets and detection are Chinese only for now. Licensed under MIT.
