@@ -1,6 +1,6 @@
 {
   "name": "cortico-world-humanize",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
   "description": "Cortico World for Coopanion: before the pet answers, reads the situation, mood and the pet's own memory and hands it a short inner thought, and reminds it when it slips into stock AI sentence patterns",
   "author": "abbabanana",
@@ -23,7 +23,7 @@
     "locales": {
       "zh": {
         "displayName": "活人感",
-        "description": "让桌宠开口前先「想一想」，说话更像个人，少一点 AI 腔。单独装就能用，搭配「活人感 provider」更快。\n\n**它做什么**\n\n- 你对桌宠说话时，先读一下情境、你的心情和桌宠自己的记忆，递给它一句「此刻心里的想法」，再让它开口。\n- 桌宠要是用了「不是……而是……」、先复述你的话这类 AI 固定句式，下次就提醒它换个说法。口癖、语气、长短都不碰。\n\n**两个扩展怎么配合**\n\n- **活人感**（就是本扩展，必装）：负责想心事、查句式。单独装就能用。\n- **活人感 provider**（可选，推荐）：把心事直接放进发给模型的请求里。不装的话，桌宠每次要先调一次工具读心事再开口，多跑一轮，稍慢一点。\n- 只装 provider、不装本扩展，没有任何作用。\n\n**怎么用**\n\n1. 在扩展页装上本扩展，推荐把「活人感 provider」一起装上。\n2. 重启 Coopanion。\n3. 到 World 页打开「活人感」。\n\n主模型用的是 DeepSeek 的话，什么都不用填。用别家的话，在活人感的「配置 → 副 API」里填地址、模型和 Key。\n\n如果活人感已经开着、之后才装 provider，World 页会提示「系统前缀需要刷新」：把活人感关掉再打开一次就好，聊天记录会保留。\n\n**要知道的**\n\n- 你每说一句话，会多调用一次副 API（默认 DeepSeek，约 1–2 秒，花费很少）。\n- 默认读桌宠、控制台、QQ 私聊和 @桌宠的消息。QQ 群里别人的话会经过副 API 影响心事，介意的话可以在配置里关掉。\n- 只支持中文，目前只在 Windows + DeepSeek 上测过。\n- 不想用了：World 页关掉即可。卸载：扩展页卸掉，重启。"
+        "description": "让桌宠开口前先「想一想」，说话更像个人，少一点 AI 腔。单独装就能用，搭配「活人感 provider」更快。\n\n**它做什么**\n\n- 你对桌宠说话时，先读一下情境、你的心情和桌宠自己的记忆，递给它一句「此刻心里的想法」，再让它开口。\n- 桌宠要是用了「不是……而是……」、先复述你的话这类 AI 固定句式，下次就提醒它换个说法。口癖、语气、长短都不碰。\n\n**两个扩展怎么配合**\n\n- **活人感**（就是本扩展，必装）：负责想心事、查句式。单独装就能用。\n- **活人感 provider**（可选，推荐）：把心事直接放进发给模型的请求里。不装的话，桌宠每次要先调一次工具读心事再开口，多跑一轮，稍慢一点。\n- 只装 provider、不装本扩展，没有任何作用。\n\n**怎么用**\n\n1. 在扩展页装上本扩展，推荐把「活人感 provider」一起装上。\n2. 重启 Coopanion。\n3. 到 World 页打开「活人感」。\n\n主模型用的是 DeepSeek 的话，什么都不用填。用别家的话，在活人感的「配置 → 副 API」里填地址、模型和 Key。\n\n如果活人感已经开着、之后才装 provider，World 页会提示「系统前缀需要刷新」：把活人感关掉再打开一次就好，聊天记录会保留。\n\n**怎么看 provider 生没生效**：World 页「活人感」的「provider」徽章显示「已生效」就是在用；「provider 注入」是心事塞进请求的次数，对桌宠说句话就会加一。没生效时，配置页顶部会写明原因和该怎么做。\n\n**想停用 provider**：不用卸载，在活人感「配置 → 基本设置」里关掉「用「活人感 provider」」，再把活人感关掉打开一次。\n\n**要知道的**\n\n- 你每说一句话，会多调用一次副 API（默认 DeepSeek，约 1–2 秒，花费很少）。\n- 默认读桌宠、控制台、QQ 私聊和 @桌宠的消息。QQ 群里别人的话会经过副 API 影响心事，介意的话可以在配置里关掉。\n- 只支持中文，目前只在 Windows + DeepSeek 上测过。\n- 不想用了：World 页关掉即可。卸载：扩展页卸掉，重启。"
       },
       "en": {
         "displayName": "Humanize",

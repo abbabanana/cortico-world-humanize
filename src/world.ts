@@ -23,7 +23,8 @@ import type {
 } from 'cortico/core/types.ts';
 import { nowIso } from 'cortico/core/util.ts';
 import { analyze, type Line, type Reading } from './analyzer.ts';
-import { BRIDGE_VERSION, installBridge, removeBridge, type HumanizeBridge, type MainContext } from './bridge.ts';
+import { BRIDGE_VERSION, installBridge, providerMarker, removeBridge, type HumanizeBridge, type MainContext } from './bridge.ts';
+import { PROVIDER_MIN, installedProviderVersion, older } from './provider-status.ts';
 import { HUMANIZE_ID, KEY_SECRET, configGroups, type HumanizeConfigSection } from './config.ts';
 import { FALLBACK_EMOTION, PresetStore, emotionsOf, type Presets, type Scene } from './presets.ts';
 import { PersonaStore } from './persona.ts';
@@ -179,7 +180,8 @@ export class HumanizeWorld implements World {
   private readonly bridge: HumanizeBridge = {
     version: BRIDGE_VERSION,
     sync: () => this.tick(),
-    claim: (cursors, main) => this.claim(cursors, main),
+    // 关了「用活人感 provider」:不交心事，provider 原样转发
+    claim: (cursors, main) => (this.useProvider() ? this.claim(cursors, main) : null),
     touch: () => { this.providerAt = Date.now(); },
   };
   /** 最近一次想好的内心，工具来晚了也能交回去。 */
@@ -192,7 +194,9 @@ export class HumanizeWorld implements World {
   private lastUserAt: number | null = null;
   private readonly recentLines: string[] = [];
   private readonly log: LogEntry[] = [];
-  private readonly stats = { api: 0, preset: 0, late: 0, light: 0, apiMs: 0, waited: 0 };
+  private readonly stats = { api: 0, preset: 0, late: 0, light: 0, apiMs: 0, waited: 0, injected: 0 };
+  /** provider 最近一次把心事塞进请求的时刻（时:分:秒）。 */
+  private lastInjectedAt = '';
   private keyNote = '';
   private readonly presets: PresetStore;
   private readonly persona: PersonaStore;
@@ -227,8 +231,14 @@ export class HumanizeWorld implements World {
    * 先看当前端点的配置（拼前缀时 provider 可能还没转发过），读不到再看它最近有没有报到。
    */
   private providerLive(): boolean {
+    if (!this.useProvider()) return false;
     return this.prefixState.providerConfigured()
       || (this.providerAt !== null && Date.now() - this.providerAt < PROVIDER_LIVE_MS);
+  }
+
+  /** 配置里的「用活人感 provider」;旧配置没有这一项时算开着。 */
+  private useProvider(): boolean {
+    return this.cfg.useProvider !== false;
   }
 
   private mode(): Mode {
@@ -479,6 +489,8 @@ export class HumanizeWorld implements World {
     return thinking.promise.then((feeling) => {
       if (!feeling) return null;
       this.stats.waited++;
+      this.stats.injected++;
+      this.lastInjectedAt = nowIso(this.opts.timezone).slice(11, 19);
       this.count(feeling);
       this.record({ trigger: feeling.via, outcome: feeling.outcome, text: feeling.body, ms: feeling.ms, error: feeling.error, how: `经 provider 注入，主模型晚发了 ${Date.now() - started}ms` });
       return feeling.body;
@@ -780,6 +792,48 @@ export class HumanizeWorld implements World {
     }
   }
 
+  /**
+   * 「活人感 provider」生没生效，给 World 页看：状态灯（悬停看详情）、徽章上的一两个字，
+   * 以及没生效时放在配置页顶部的一句说明。
+   */
+  private providerStatus(): { lamp: WorldLamp; badge: string; note?: string } {
+    const label = '活人感 provider';
+    const endpoint = this.prefixState.activeEndpoint() || '（未选）';
+    const kind = this.prefixState.activeKind();
+    if (providerMarker()) {
+      if (!this.useProvider()) {
+        const stale = this.staleness();
+        const hint = stale && stale.from === 'provider'
+          ? '已在配置里关掉，还差一步：把活人感关掉再打开一次'
+          : '已装好，但在配置里关掉了：provider 原样转发，桌宠先调用 humanize_feel 再开口。想用就打开「用「活人感 provider」」。';
+        return { lamp: { label, state: 'offline', hint }, badge: '已关闭' };
+      }
+      if (!this.prefixState.providerConfigured()) {
+        const why = `活人感 provider 已装好，但没包住当前端点「${endpoint}」${kind ? `（类型 ${kind}）` : ''}，这个端点不会带上活人感，桌宠照旧先调用 humanize_feel。`;
+        return { lamp: { label, state: 'error', hint: why }, badge: '没包住', note: why };
+      }
+      const stale = this.staleness();
+      if (stale && stale.to === 'provider' && stale.from !== 'provider') {
+        return { lamp: { label, state: 'loading', hint: '已装好，还差一步：把活人感关掉再打开一次' }, badge: '待刷新' };
+      }
+      const n = this.stats.injected;
+      const hint = n
+        ? `已生效：包着端点「${endpoint}」。这次启动已注入 ${n} 次，最近一次 ${this.lastInjectedAt}。`
+        : `已生效：包着端点「${endpoint}」。对桌宠说句话，「provider 注入」就会加一。`;
+      return { lamp: { label, state: 'online', hint }, badge: '已生效' };
+    }
+    const version = installedProviderVersion(this.opts.botDir);
+    if (!version) {
+      return { lamp: { label, state: 'offline', hint: '没装（可选）：装上「活人感 provider」并重启，桌宠每次能少跑一轮。' }, badge: '没装' };
+    }
+    if (older(version, PROVIDER_MIN)) {
+      const why = `装着的活人感 provider 是 ${version}，太旧了，和这一版活人感对不上，现在不起作用（不会出错，只是桌宠每次多跑一轮）。到「扩展」页把它升到最新版，然后重启 Coopanion。`;
+      return { lamp: { label, state: 'error', hint: why }, badge: '版本旧', note: why };
+    }
+    const why = `活人感 provider ${version} 已安装，但还没加载：重启一次 Coopanion 才生效。`;
+    return { lamp: { label, state: 'error', hint: why }, badge: '待重启', note: why };
+  }
+
   /** 请桌宠用一两句话转告对方。和 Coopanion 自己告诉桌宠设置变了是同一个路子。 */
   private async notice(text: string): Promise<void> {
     const host = this.host;
@@ -808,6 +862,8 @@ export class HumanizeWorld implements World {
     if (this.cfg.voice && voice.outdated && voice.edited) {
       notes.push('人设改过了，但口吻样本是按旧人设写的（你改过它，所以没有自动重写）：想按新人设重写，勾一下下面的「重写口吻样本」。');
     }
+    const provider = this.providerStatus();
+    if (provider.note) notes.push(provider.note);
     if (this.prefixState.legacyEndpoint()) {
       notes.push(`当前端点「${this.prefixState.activeEndpoint()}」是旧版的「活人感」端点。现在不用它了：装着活人感 provider 时，你原来的端点会自动带上活人感。建议在「模型」页切回原来的端点；以后要卸载 provider，也一定要先切回去，不然桌宠会说不了话。`);
     }
@@ -871,7 +927,8 @@ export class HumanizeWorld implements World {
       stat: () => `${this.log.length} 条`,
       clear: () => {
         this.log.length = 0;
-        Object.assign(this.stats, { api: 0, preset: 0, late: 0, light: 0, apiMs: 0, waited: 0 });
+        Object.assign(this.stats, { api: 0, preset: 0, late: 0, light: 0, apiMs: 0, waited: 0, injected: 0 });
+        this.lastInjectedAt = '';
         this.writeLog();
         return '已清空';
       },
@@ -881,11 +938,14 @@ export class HumanizeWorld implements World {
     const prefixLamp: WorldLamp = stale
       ? { label: '系统前缀', state: this.cfg.autoRefresh ? 'loading' : 'error', hint: this.cfg.autoRefresh ? '等桌宠空闲后自动刷新' : '需要刷新：把活人感关掉再打开一次' }
       : { label: '系统前缀', state: 'online', hint: `最新（${MODE_LABEL[this.mode()]}）` };
+    const provider = this.providerStatus();
     return {
       label: '活人感',
-      lamps: [lamp, prefixLamp],
+      lamps: [lamp, prefixLamp, provider.lamp],
       badges: [
         { label: '前缀', value: stale ? '需要刷新' : '最新', tone: stale ? 'off' : 'on' },
+        { label: 'provider', value: provider.badge, tone: provider.lamp.state === 'online' ? 'on' : provider.lamp.state === 'offline' ? 'plain' : 'off' },
+        { label: 'provider 注入', value: this.stats.injected, tone: this.stats.injected ? 'on' : 'plain' },
         { label: '副 API 引导', value: this.stats.api, tone: 'on' },
         { label: '预设兜底', value: this.stats.preset, tone: 'plain' },
         { label: '等内心再开口', value: this.stats.waited, tone: 'plain' },

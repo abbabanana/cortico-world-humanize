@@ -17,6 +17,11 @@ export interface HumanizeConfigSection {
    * 关掉则是抢时间模式：引导回来时桌宠还没开口才用得上。
    */
   wait: boolean;
+  /**
+   * 用「活人感」provider 把心事直接塞进主模型请求。provider 扩展本身没有开关（Coopanion 不支持
+   * 停用 provider 扩展），开关放在这里：关掉后 provider 原样转发，桌宠改回先调用 humanize_feel。
+   */
+  useProvider: boolean;
   /** 摸头、戳、换装这类小动作也带一句轻预设（不调副 API）。 */
   light: boolean;
   /** 小动作带轻预设的概率，0–1；动作频繁时别每次都带。 */
@@ -62,6 +67,7 @@ export const HUMANIZE_DEFAULTS: HumanizeConfigSection = {
   enabled: false,
   guide: true,
   wait: true,
+  useProvider: true,
   light: true,
   lightChance: 0.5,
   contextTurns: 6,
@@ -143,6 +149,10 @@ export function configGroups(keyStatus: string, notes: string[] = [], seen: Seen
             type: 'boolean', title: '先感受再开口',
             description: '开着：桌宠收到你的话先等副 API 想好心情再回答，每次都用得上，但回应慢一秒左右。关掉：抢时间，桌宠开口太快时这一轮的引导就作废。改完在下一次会话开始时完全生效。',
             'x-hot': true,
+          },
+          [`${K}.useProvider`]: {
+            type: 'boolean', title: '用「活人感 provider」', 'x-hot': true,
+            description: '装了「活人感 provider」才有用（没装时开着也没关系）。开着：心事直接跟着你的话发给模型，桌宠一轮就开口。关掉：provider 原样转发、什么都不做，桌宠改回先调用 humanize_feel。Coopanion 的模型扩展没有停用开关，所以开关放在这里。改完把活人感关掉再打开一次才完全生效。',
           },
           [`${K}.light`]: {
             type: 'boolean', title: '小动作也带轻预设',
