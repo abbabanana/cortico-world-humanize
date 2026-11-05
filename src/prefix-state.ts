@@ -21,8 +21,8 @@ export const MODE_LABEL: Record<Mode, string> = {
   push: '抢时间模式（心事作为事件推送）',
 };
 
-/** 0.1.0 时要手动新建的那种端点。 */
-const LEGACY_KIND = 'humanize';
+/** 活人感 provider 的端点类型。 */
+const HUMANIZE_KIND = 'humanize';
 
 interface Saved {
   prefix?: { mode: Mode; sig: string };
@@ -88,9 +88,9 @@ export class PrefixState {
     return !!kind && !!providerMarker()?.wraps(kind);
   }
 
-  /** 当前端点是不是 0.1.0 时手动新建的那种（卸 provider 前要先切回原端点）。 */
-  legacyEndpoint(): boolean {
-    return this.activeKind() === LEGACY_KIND;
+  /** 当前端点是不是活人感端点（卸 provider 前要先切回原端点）。 */
+  onHumanizeEndpoint(): boolean {
+    return this.activeKind() === HUMANIZE_KIND;
   }
 
   /** 拼前缀时记下当时的模式和指纹。 */

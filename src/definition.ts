@@ -35,8 +35,8 @@ export const HUMANIZE: WorldDefinition<HumanizeConfigSection> = {
     }, {
       type: NOTICE_EVENT,
       description: {
-        zh: '请桌宠转告对方的提醒：换了模式或扩展更新后，系统前缀需要刷新；还在用旧版「活人感」端点时，卸载 provider 前要先切回原端点。每种变化一次。',
-        en: 'A reminder the pet passes on: the system prefix needs a refresh after a mode change or an update; on a legacy Humanize endpoint, switch back before uninstalling the provider. Once per change.',
+        zh: '请桌宠转告对方的提醒：换了模式或扩展更新后，系统前缀需要刷新；用着活人感端点时，卸载 provider 前要先切回原端点。每种变化一次。',
+        en: 'A reminder the pet passes on: the system prefix needs a refresh after a mode change or an update; on a Humanize endpoint, switch back before uninstalling the provider. Once per change.',
       },
       trigger: 'flush',
     }],

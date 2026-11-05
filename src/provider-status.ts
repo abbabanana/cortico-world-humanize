@@ -9,8 +9,8 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const PACKAGE = 'cortico-provider-humanize';
-/** 这一版 World 要求的 provider 最低版本（桥第 3 版）。 */
-export const PROVIDER_MIN = '0.2.0';
+/** 这一版 World 要求的 provider 最低版本（桥第 4 版）。 */
+export const PROVIDER_MIN = '0.3.0';
 const CACHE_MS = 5_000;
 
 const OWN_DIR = fileURLToPath(new URL('..', import.meta.url));

@@ -22,6 +22,10 @@ export interface HumanizeConfigSection {
    * 停用 provider 扩展），开关放在这里：关掉后 provider 原样转发，桌宠改回先调用 humanize_feel。
    */
   useProvider: boolean;
+  /** 一次性：照着当前的 Coo 端点复制一个活人感端点并切过去，做完自动取消。 */
+  switchToProvider: boolean;
+  /** 一次性：从活人感端点切回原来的端点，做完自动取消。 */
+  switchBack: boolean;
   /** 摸头、戳、换装这类小动作也带一句轻预设（不调副 API）。 */
   light: boolean;
   /** 小动作带轻预设的概率，0–1；动作频繁时别每次都带。 */
@@ -68,6 +72,8 @@ export const HUMANIZE_DEFAULTS: HumanizeConfigSection = {
   guide: true,
   wait: true,
   useProvider: true,
+  switchToProvider: false,
+  switchBack: false,
   light: true,
   lightChance: 0.5,
   contextTurns: 6,
@@ -152,7 +158,15 @@ export function configGroups(keyStatus: string, notes: string[] = [], seen: Seen
           },
           [`${K}.useProvider`]: {
             type: 'boolean', title: '用「活人感 provider」', 'x-hot': true,
-            description: '装了「活人感 provider」才有用（没装时开着也没关系）。开着：心事直接跟着你的话发给模型，桌宠一轮就开口。关掉：provider 原样转发、什么都不做，桌宠改回先调用 humanize_feel。Coopanion 的模型扩展没有停用开关，所以开关放在这里。改完把活人感关掉再打开一次才完全生效。',
+            description: '装了「活人感 provider」并切到活人感端点才有用（没装时开着也没关系）。开着：心事直接跟着你的话发给模型，桌宠一轮就开口。关掉：provider 原样转发、什么都不做，桌宠改回先调用 humanize_feel，不用切端点也不用卸载。改完把活人感关掉再打开一次才完全生效。',
+          },
+          [`${K}.switchToProvider`]: {
+            type: 'boolean', title: '切换到活人感端点', 'x-hot': true,
+            description: '装好「活人感 provider」后勾一下：照着你现在用的端点复制一个「活人感」端点（地址、模型、Key 都一样）并切过去，做完自动取消勾选，重启 Coopanion 后生效。和「模型」页的「复制端点」做的是同一件事，只是替你点了。只支持 Coo 连接的端点。',
+          },
+          [`${K}.switchBack`]: {
+            type: 'boolean', title: '切回原来的端点', 'x-hot': true,
+            description: '从活人感端点切回原来那个，做完自动取消勾选，重启 Coopanion 后生效。卸载「活人感 provider」之前一定要先切回来，不然 Coopanion 找不到这种端点，桌宠会说不了话。',
           },
           [`${K}.light`]: {
             type: 'boolean', title: '小动作也带轻预设',

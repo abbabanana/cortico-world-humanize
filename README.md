@@ -11,7 +11,7 @@
 
 ## 安装
 
-1. Coopanion 的「扩展」页搜「活人感」，安装 `cortico-world-humanize`。推荐把 `cortico-provider-humanize` 也装上（可选，装上就生效，不用设置）。
+1. Coopanion 的「扩展」页搜「活人感」，安装 `cortico-world-humanize`。想更快可以再装 `cortico-provider-humanize`（可选，装好后要切一次端点，见下面「用 provider」）。
 2. 重启 Coopanion。
 3. World 页打开「活人感」。
 
@@ -35,10 +35,17 @@
 
 | 方式 | 什么时候 | 效果 |
 |---|---|---|
-| **provider 模式** | 装了活人感 provider（装上就自动包住你现在用的端点），且基本设置里「用「活人感 provider」」开着（默认开） | provider 在主模型请求发出前等心事，塞进请求再发。一轮就带着心事开口，最推荐 |
+| **provider 模式** | 装了活人感 provider、当前端点切到了「活人感」端点，且基本设置里「用「活人感 provider」」开着（默认开） | provider 在主模型请求发出前等心事，塞进请求再发。一轮就带着心事开口，最推荐 |
 | 先感受再开口（默认） | 没用 provider | 桌宠先调用 `humanize_feel`，工具等副 API 想好再交回去。每次都赶得上，但主模型多一轮 |
 | 抢时间 | 没用 provider，且关掉「先感受再开口」 | 心事作为事件推进去，桌宠已经开口就作废 |
 
+## 用 provider
+
+1. 装上 `cortico-provider-humanize`，重启 Coopanion。
+2. 活人感「配置 → 基本设置」里勾「切换到活人感端点」。它照着你现在用的端点复制一个「活人感」端点（地址、模型、Key 都一样）并切过去，和「模型」页的「复制端点」做的是同一件事。只支持 Coo 连接的端点；「模型」页正在保存时会让你过几秒再勾。
+3. 再重启一次 Coopanion，按提示把活人感关掉再打开一次。
+
+provider 只影响你切过去的那个端点，别的端点和 Coopanion 本身都不碰。想切回去就勾「切回原来的端点」，同样重启后生效。
 ## 说话习惯体检（只管固定句式）
 
 活人感会记下「对方说了什么 → 桌宠回了什么」，在桌宠最近 12 句里查这些句式。**真用过的**才在心事后面附一句提醒，带上次数和它自己说过的原话：
@@ -59,7 +66,7 @@
 - **提示词**：预设库（情境、情绪、小动作、不想听到的说法）、环境提示词、口吻样本、最近 20 轮记录
 - **数据**：清空最近记录和计数
 - 导航栏：副 API、系统前缀、活人感 provider 三个状态灯（悬停看详情），以及几个计数
-- **provider 生没生效**：看「provider」徽章。「已生效」就是在用；「待刷新」「待重启」「版本旧」「没包住」会在配置页顶部写明怎么办。「provider 注入」是这次启动后心事塞进请求的次数，对桌宠说句话它就加一
+- **provider 生没生效**：看「provider」徽章。「已生效」就是在用；「未切换」「待刷新」「待重启」「版本旧」会在配置页顶部写明怎么办。「provider 注入」是这次启动后心事塞进请求的次数，对桌宠说句话它就加一
 
 ## 系统前缀要刷新的时候
 
@@ -88,7 +95,7 @@ Coopanion 重启后沿用旧的系统前缀。换了模式或者活人感更新�
 
 - **只停用 provider**：基本设置里关掉「用「活人感 provider」」，再把活人感关开一次。provider 原样转发，活人感改回「先感受再开口」。Coopanion 的模型扩展本身没有停用开关，所以放在这里。
 - **暂时不用**：World 页关掉「活人感」。Coopanion 会立刻重建系统前缀，环境说明和 `humanize_feel` 工具一起拿掉。
-- **卸载**：在「扩展」页卸掉两个包，然后重启。只有一种情况要先做一步：你用 0.1.0 时在「模型」页新建过「活人感」端点，而且当前端点还是它，那要**先把当前端点切回原来那个**，不然卸掉 provider 后桌宠会说不了话。
+- **卸载**：用了 provider 的话，**先在基本设置里勾「切回原来的端点」并重启**，再在「扩展」页卸掉两个包，然后重启。当前端点还是活人感端点时就卸掉 provider，桌宠会说不了话。
 - **清干净**：想连数据一起去掉，删掉上面「数据和隐私」里列的两个文件夹和配置段即可。
 
 ## 开发
@@ -111,4 +118,4 @@ MIT
 
 **Humanize** is a Cortico World for the Coopanion desktop pet. When someone talks to the pet, it reads the situation, the person's mood and the pet's own persona and memory files, and hands the pet a short inner thought before it answers. It also watches the pet's recent lines for stock AI sentence patterns ("not X but Y", parroting the other person's words back, either-or questions, aphorisms, and similar) and reminds the pet to say it another way when one shows up. It only targets sentence patterns: catchphrases, tone and length are left to the character.
 
-Install it from Coopanion's Extensions page, restart, and turn it on in the World page. It works best together with [cortico-provider-humanize](https://github.com/abbabanana/cortico-provider-humanize), which puts the inner thought straight into the main model's request; install it and restart, there is nothing to configure. Prompts, presets and detection are Chinese only for now. Licensed under MIT.
+Install it from Coopanion's Extensions page, restart, and turn it on in the World page. It works best together with [cortico-provider-humanize](https://github.com/abbabanana/cortico-provider-humanize), which puts the inner thought straight into the main model's request: install it, restart, tick "Switch to the Humanize endpoint" in the settings and restart again. Prompts, presets and detection are Chinese only for now. Licensed under MIT.

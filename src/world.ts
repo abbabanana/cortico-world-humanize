@@ -25,6 +25,7 @@ import { nowIso } from 'cortico/core/util.ts';
 import { analyze, type Line, type Reading } from './analyzer.ts';
 import { BRIDGE_VERSION, installBridge, providerMarker, removeBridge, type HumanizeBridge, type MainContext } from './bridge.ts';
 import { PROVIDER_MIN, installedProviderVersion, older } from './provider-status.ts';
+import { switchBack, switchToHumanize, type SwitchResult } from './endpoint.ts';
 import { HUMANIZE_ID, KEY_SECRET, configGroups, type HumanizeConfigSection } from './config.ts';
 import { FALLBACK_EMOTION, PresetStore, emotionsOf, type Presets, type Scene } from './presets.ts';
 import { PersonaStore } from './persona.ts';
@@ -197,6 +198,13 @@ export class HumanizeWorld implements World {
   private readonly stats = { api: 0, preset: 0, late: 0, light: 0, apiMs: 0, waited: 0, injected: 0 };
   /** provider 最近一次把心事塞进请求的时刻（时:分:秒）。 */
   private lastInjectedAt = '';
+  /**
+   * 这次运行里一键切过端点：Coopanion 重启前还在用旧端点，模式按切之前的算（不然前缀和请求对不上）。
+   * null = 没切过，照当前配置算。
+   */
+  private frozenProvider: boolean | null = null;
+  /** 最近一次一键切换的结果，放在配置页顶部。 */
+  private endpointNote = '';
   private keyNote = '';
   private readonly presets: PresetStore;
   private readonly persona: PersonaStore;
@@ -232,8 +240,49 @@ export class HumanizeWorld implements World {
    */
   private providerLive(): boolean {
     if (!this.useProvider()) return false;
-    return this.prefixState.providerConfigured()
+    return this.onProviderEndpoint()
       || (this.providerAt !== null && Date.now() - this.providerAt < PROVIDER_LIVE_MS);
+  }
+
+  /** 当前（这次运行实际在用的）端点是不是活人感端点、provider 也在。 */
+  private onProviderEndpoint(): boolean {
+    return this.frozenProvider ?? this.prefixState.providerConfigured();
+  }
+
+  /** 配置页勾了一键切换 / 切回：做完取消勾选，结果放在配置页顶部。 */
+  private handleSwitch(): void {
+    if (!this.cfg.switchToProvider && !this.cfg.switchBack) return;
+    const before = this.onProviderEndpoint();
+    let result: SwitchResult;
+    if (this.cfg.switchToProvider) {
+      const version = installedProviderVersion(this.opts.botDir);
+      result = !providerMarker() && (!version || older(version, PROVIDER_MIN))
+        ? { ok: false, message: `要先在「扩展」页装好「活人感 provider」（${PROVIDER_MIN} 以上）再切，不然切过去桌宠会说不了话。` }
+        : switchToHumanize(this.opts.botDir);
+      if (result.ok && result.from) this.saveEndpointFrom(result.from);
+    } else {
+      result = switchBack(this.opts.botDir, this.loadEndpointFrom());
+    }
+    this.opts.persist({ switchToProvider: false, switchBack: false });
+    if (result.ok && this.frozenProvider === null) this.frozenProvider = before;
+    this.endpointNote = result.message;
+    this.record({ trigger: '端点', outcome: result.ok ? 'voice' : 'skipped', text: result.message });
+  }
+
+  private endpointFile(): string { return join(this.opts.dataDir, 'endpoint.json'); }
+
+  private saveEndpointFrom(from: string): void {
+    try {
+      mkdirSync(this.opts.dataDir, { recursive: true });
+      writeFileSync(this.endpointFile(), JSON.stringify({ from }, null, 2), 'utf8');
+    } catch { /* 记不下来就靠名字找 */ }
+  }
+
+  private loadEndpointFrom(): string | undefined {
+    try {
+      const from = (JSON.parse(readFileSync(this.endpointFile(), 'utf8')) as { from?: unknown }).from;
+      return typeof from === 'string' ? from : undefined;
+    } catch { return undefined; }
   }
 
   /** 配置里的「用活人感 provider」;旧配置没有这一项时算开着。 */
@@ -328,6 +377,7 @@ export class HumanizeWorld implements World {
     if (!host) return;
     if (++this.ticks % KEY_SYNC_TICKS === 0) {
       this.syncKey();
+      this.handleSwitch();
       this.checkPrefix();
       if (this.ticks % (KEY_SYNC_TICKS * 60) === 0) this.sources.flush();
       // 勾了「重写」就马上写；否则大约一分钟看一次人设变没变
@@ -769,8 +819,8 @@ export class HumanizeWorld implements World {
     const what = stale.from !== stale.to
       ? `换成了${MODE_LABEL[stale.to]}`
       : '更新了给桌宠的说明';
-    const uninstall = stale.to === 'provider' && this.prefixState.legacyEndpoint()
-      ? '另外记一下：现在用的是旧版的「活人感」端点，以后要卸载「活人感 provider」的话，先在「模型」页把端点切回原来那个，不然我会说不了话。'
+    const uninstall = stale.to === 'provider' && this.prefixState.onHumanizeEndpoint()
+      ? '另外记一下：以后要卸载「活人感 provider」的话，先在活人感的设置里勾「切回原来的端点」，不然我会说不了话。'
       : '';
     if (this.cfg.autoRefresh) {
       if (this.phase !== 'idle' || !this.prefixState.firstTime(`refresh:${key}`)) return;
@@ -800,6 +850,12 @@ export class HumanizeWorld implements World {
     const label = '活人感 provider';
     const endpoint = this.prefixState.activeEndpoint() || '（未选）';
     const kind = this.prefixState.activeKind();
+    if (this.frozenProvider !== null && this.frozenProvider !== this.prefixState.providerConfigured()) {
+      const hint = this.prefixState.onHumanizeEndpoint()
+        ? `已切到活人感端点「${endpoint}」，重启 Coopanion 后生效。`
+        : `已切回「${endpoint}」，重启 Coopanion 后生效。`;
+      return { lamp: { label, state: 'loading', hint }, badge: '待重启' };
+    }
     if (providerMarker()) {
       if (!this.useProvider()) {
         const stale = this.staleness();
@@ -809,8 +865,10 @@ export class HumanizeWorld implements World {
         return { lamp: { label, state: 'offline', hint }, badge: '已关闭' };
       }
       if (!this.prefixState.providerConfigured()) {
-        const why = `活人感 provider 已装好，但没包住当前端点「${endpoint}」${kind ? `（类型 ${kind}）` : ''}，这个端点不会带上活人感，桌宠照旧先调用 humanize_feel。`;
-        return { lamp: { label, state: 'error', hint: why }, badge: '没包住', note: why };
+        const why = kind === 'coo'
+          ? `活人感 provider 已装好，但当前端点「${endpoint}」不是活人感端点：勾下面的「切换到活人感端点」，重启后生效。`
+          : `活人感 provider 已装好，但当前端点「${endpoint}」${kind ? `（类型 ${kind}）` : ''}不是活人感端点，而且 provider 只能包住 Coo 连接：先在「模型」页换成 Coo 连接的端点，再勾「切换到活人感端点」。`;
+        return { lamp: { label, state: 'error', hint: why }, badge: '未切换', note: why };
       }
       const stale = this.staleness();
       if (stale && stale.to === 'provider' && stale.from !== 'provider') {
@@ -818,8 +876,8 @@ export class HumanizeWorld implements World {
       }
       const n = this.stats.injected;
       const hint = n
-        ? `已生效：包着端点「${endpoint}」。这次启动已注入 ${n} 次，最近一次 ${this.lastInjectedAt}。`
-        : `已生效：包着端点「${endpoint}」。对桌宠说句话，「provider 注入」就会加一。`;
+        ? `已生效：当前端点「${endpoint}」。这次启动已注入 ${n} 次，最近一次 ${this.lastInjectedAt}。`
+        : `已生效：当前端点「${endpoint}」。对桌宠说句话，「provider 注入」就会加一。`;
       return { lamp: { label, state: 'online', hint }, badge: '已生效' };
     }
     const version = installedProviderVersion(this.opts.botDir);
@@ -827,7 +885,7 @@ export class HumanizeWorld implements World {
       return { lamp: { label, state: 'offline', hint: '没装（可选）：装上「活人感 provider」并重启，桌宠每次能少跑一轮。' }, badge: '没装' };
     }
     if (older(version, PROVIDER_MIN)) {
-      const why = `装着的活人感 provider 是 ${version}，太旧了，和这一版活人感对不上，现在不起作用（不会出错，只是桌宠每次多跑一轮）。到「扩展」页把它升到最新版，然后重启 Coopanion。`;
+      const why = `装着的活人感 provider 是 ${version}，和这一版活人感对不上，现在不起作用（不会出错，只是桌宠每次多跑一轮）。0.2.x 会接管所有端点，已经从市场下架：到「扩展」页把它升到 ${PROVIDER_MIN} 以上，重启 Coopanion，再勾「切换到活人感端点」。`;
       return { lamp: { label, state: 'error', hint: why }, badge: '版本旧', note: why };
     }
     const why = `活人感 provider ${version} 已安装，但还没加载：重启一次 Coopanion 才生效。`;
@@ -862,10 +920,11 @@ export class HumanizeWorld implements World {
     if (this.cfg.voice && voice.outdated && voice.edited) {
       notes.push('人设改过了，但口吻样本是按旧人设写的（你改过它，所以没有自动重写）：想按新人设重写，勾一下下面的「重写口吻样本」。');
     }
+    if (this.endpointNote) notes.push(this.endpointNote);
     const provider = this.providerStatus();
     if (provider.note) notes.push(provider.note);
-    if (this.prefixState.legacyEndpoint()) {
-      notes.push(`当前端点「${this.prefixState.activeEndpoint()}」是旧版的「活人感」端点。现在不用它了：装着活人感 provider 时，你原来的端点会自动带上活人感。建议在「模型」页切回原来的端点；以后要卸载 provider，也一定要先切回去，不然桌宠会说不了话。`);
+    if (this.prefixState.onHumanizeEndpoint() && !this.endpointNote) {
+      notes.push(`当前端点「${this.prefixState.activeEndpoint()}」是活人感端点。以后要卸载「活人感 provider」，先勾下面的「切回原来的端点」并重启，不然桌宠会说不了话。`);
     }
     return notes;
   }
