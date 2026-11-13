@@ -42,10 +42,14 @@
 ## 用 provider
 
 1. 装上 `cortico-provider-humanize`，重启 Coopanion。
-2. 活人感「配置 → 基本设置」里勾「切换到活人感端点」。它照着你现在用的端点复制一个「活人感」端点（地址、模型、Key 都一样）并切过去，和「模型」页的「复制端点」做的是同一件事。只支持 Coo 连接的端点；「模型」页正在保存时会让你过几秒再勾。
-3. 再重启一次 Coopanion，按提示把活人感关掉再打开一次。
+2. 打开「模型」页，点「+ 新建供应商实例」：类型选「活人感（包住 Coo 连接）」，地址、模型、思考档、API Key 照你现在用的端点填，名字随便起，保存。
+3. 选中它，点「设为当前供应商」。
+4. 回到 World 页的「活人感」，按提示把它关掉再打开一次。
 
-provider 只影响你切过去的那个端点，别的端点和 Coopanion 本身都不碰。想切回去就勾「切回原来的端点」，同样重启后生效。
+装好 provider 但还没切过去时，活人感「配置」页顶部会列出这几步，并把你现在用的端点的地址和模型抄出来给你对着填。只支持 Coo 连接的端点。
+
+活人感只读端点配置，不替你新建、修改或切换端点。provider 只影响你切过去的那个端点，别的端点和 Coopanion 本身都不碰。想切回去：「模型」页选中原来的端点，点「设为当前供应商」，再把活人感关开一次。
+
 ## 说话习惯体检（只管固定句式）
 
 活人感会记下「对方说了什么 → 桌宠回了什么」，在桌宠最近 12 句里查这些句式。**真用过的**才在心事后面附一句提醒，带上次数和它自己说过的原话：
@@ -95,7 +99,7 @@ Coopanion 重启后沿用旧的系统前缀。换了模式或者活人感更新�
 
 - **只停用 provider**：基本设置里关掉「用「活人感 provider」」，再把活人感关开一次。provider 原样转发，活人感改回「先感受再开口」。Coopanion 的模型扩展本身没有停用开关，所以放在这里。
 - **暂时不用**：World 页关掉「活人感」。Coopanion 会立刻重建系统前缀，环境说明和 `humanize_feel` 工具一起拿掉。
-- **卸载**：用了 provider 的话，**先在基本设置里勾「切回原来的端点」并重启**，再在「扩展」页卸掉两个包，然后重启。当前端点还是活人感端点时就卸掉 provider，桌宠会说不了话。
+- **卸载**：用了 provider 的话，**先在「模型」页把当前供应商切回原来的端点**，再在「扩展」页卸掉两个包，然后重启。当前端点还是活人感端点时就卸掉 provider，桌宠会说不了话。
 - **清干净**：想连数据一起去掉，删掉上面「数据和隐私」里列的两个文件夹和配置段即可。
 
 ## 开发
@@ -118,4 +122,4 @@ MIT
 
 **Humanize** is a Cortico World for the Coopanion desktop pet. When someone talks to the pet, it reads the situation, the person's mood and the pet's own persona and memory files, and hands the pet a short inner thought before it answers. It also watches the pet's recent lines for stock AI sentence patterns ("not X but Y", parroting the other person's words back, either-or questions, aphorisms, and similar) and reminds the pet to say it another way when one shows up. It only targets sentence patterns: catchphrases, tone and length are left to the character.
 
-Install it from Coopanion's Extensions page, restart, and turn it on in the World page. It works best together with [cortico-provider-humanize](https://github.com/abbabanana/cortico-provider-humanize), which puts the inner thought straight into the main model's request: install it, restart, tick "Switch to the Humanize endpoint" in the settings and restart again. Prompts, presets and detection are Chinese only for now. Licensed under MIT.
+Install it from Coopanion's Extensions page, restart, and turn it on in the World page. It works best together with [cortico-provider-humanize](https://github.com/abbabanana/cortico-provider-humanize), which puts the inner thought straight into the main model's request: install it, restart, then on the Models page create a "Humanize (wraps the Coo connection)" connection with the same address, model and key as your current one and set it as current. The World only reads your endpoint configuration and never writes it. Prompts, presets and detection are Chinese only for now. Licensed under MIT.

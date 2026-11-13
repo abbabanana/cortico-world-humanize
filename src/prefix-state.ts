@@ -76,6 +76,11 @@ export class PrefixState {
     return typeof name === 'string' ? name : '';
   }
 
+  /** 当前端点的配置（只读，给页面上的切换步骤照抄地址和模型）；读不到给 null。 */
+  activeEntry(): Record<string, unknown> | null {
+    return this.endpoint.read();
+  }
+
   /** 当前端点的模块（kind）；读不到给空串。 */
   activeKind(): string {
     const kind = this.endpoint.read()?.kind;
