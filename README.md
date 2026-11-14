@@ -1,5 +1,13 @@
 # 活人感 · cortico-world-humanize
 
+> **⚠️ 已停止维护（2026-11）**
+> 活人感不再更新。已经装着的照常能用，想卸载请按这个顺序：
+> 1. 如果在「模型」页切到过「活人感（包住 Coo 连接）」类型的供应商，先选回原来的供应商，点「设为当前供应商」。
+> 2. 到「扩展」页卸掉 `cortico-provider-humanize` 和 `cortico-world-humanize`。
+> 3. 重启 Coopanion。
+>
+> 顺序别反：当前供应商还是活人感类型时先卸掉 provider，桌宠会说不了话。
+
 给 [Coopanion](https://github.com/Pal-AI-Lab/Coopanion) 桌宠用的 Cortico World 扩展，让桌宠说话更像个人。
 
 - **开口前先有心事**：有人对桌宠说话时，先读一下情境、对方的情绪和桌宠自己的记忆，递给它一句「此刻心里的想法」，再让它开口。
